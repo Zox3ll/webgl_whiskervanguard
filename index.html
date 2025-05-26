@@ -1,61 +1,60 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <title>Unity WebGL Player | Tower of Defence</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
     <style>
         html, body {
             margin: 0;
             padding: 0;
-            background: black;
-            overflow-x: hidden;
             font-family: Arial, sans-serif;
+            background-color: #000;
+            overflow-x: hidden;
         }
 
         #unity-container {
-            display: flex;
+            display: none;
+            width: 100vw;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+            #unity-container canvas {
+                width: 960px;
+                height: 600px;
+            }
+
+        #portrait-warning {
+            display: none;
             height: 100vh;
-            background: black;
+            padding: 20px;
+            text-align: center;
+            background-color: #fff;
+            color: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
-        @media screen and (orientation: portrait) {
-            #unity-container {
-                display: none;
-            }
-
-            #terms-link {
-                display: block;
-                text-align: center;
-                padding: 40px 20px;
-                font-size: 18px;
-                color: black;
-                background-color: white;
-            }
-
-                #terms-link a {
-                    color: #0066cc;
-                    text-decoration: none;
-                    font-weight: bold;
-                }
-        }
-
-        @media screen and (orientation: landscape) {
-            #terms-link {
-                display: none;
-            }
+        #terms-link {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #0066cc;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
 
     <div id="unity-container" class="unity-desktop">
-        <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+        <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
         <div id="unity-loading-bar">
             <div id="unity-logo"></div>
             <div id="unity-progress-bar-empty">
@@ -70,19 +69,19 @@
         </div>
     </div>
 
-    <div id="terms-link" style="display: none;">
-        <p>
-            <a href="terms.html">Läs villkor och bestämmelser</a>
-        </p>
+    <div id="portrait-warning">
+        <p>Vänligen rotera din enhet till liggande läge (landskap) för att spela.</p>
+        <a id="terms-link" href="terms.html">Läs villkor och bestämmelser</a>
     </div>
 
     <script>
-        var container = document.querySelector("#unity-container");
-        var canvas = document.querySelector("#unity-canvas");
-        var loadingBar = document.querySelector("#unity-loading-bar");
-        var progressBarFull = document.querySelector("#unity-progress-bar-full");
-        var fullscreenButton = document.querySelector("#unity-fullscreen-button");
-        var warningBanner = document.querySelector("#unity-warning");
+        const unityContainer = document.getElementById("unity-container");
+        const canvas = document.getElementById("unity-canvas");
+        const loadingBar = document.getElementById("unity-loading-bar");
+        const progressBarFull = document.getElementById("unity-progress-bar-full");
+        const fullscreenButton = document.getElementById("unity-fullscreen-button");
+        const warningBanner = document.getElementById("unity-warning");
+        const portraitWarning = document.getElementById("portrait-warning");
 
         function unityShowBanner(msg, type) {
             function updateBannerVisibility() {
@@ -91,9 +90,9 @@
             var div = document.createElement('div');
             div.innerHTML = msg;
             warningBanner.appendChild(div);
-            if (type == 'error') div.style = 'background: red; padding: 10px;';
+            if (type === 'error') div.style = 'background: red; padding: 10px;';
             else {
-                if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+                if (type === 'warning') div.style = 'background: yellow; padding: 10px;';
                 setTimeout(() => {
                     warningBanner.removeChild(div);
                     updateBannerVisibility();
@@ -102,9 +101,9 @@
             updateBannerVisibility();
         }
 
-        var buildUrl = "Build";
-        var loaderUrl = buildUrl + "/webGL Build.loader.js";
-        var config = {
+        const buildUrl = "Build";
+        const loaderUrl = buildUrl + "/webGL Build.loader.js";
+        const config = {
             dataUrl: buildUrl + "/webGL Build.data.br",
             frameworkUrl: buildUrl + "/webGL Build.framework.js.br",
             codeUrl: buildUrl + "/webGL Build.wasm.br",
@@ -115,70 +114,44 @@
             showBanner: unityShowBanner,
         };
 
-        loadingBar.style.display = "block";
-
-        var script = document.createElement("script");
-        script.src = loaderUrl;
-        script.onload = () => {
-            createUnityInstance(canvas, config, (progress) => {
-                progressBarFull.style.width = 100 * progress + "%";
-            }).then((unityInstance) => {
-                loadingBar.style.display = "none";
-                fullscreenButton.onclick = () => {
-                    unityInstance.SetFullscreen(1);
-                };
-            }).catch((message) => {
-                alert(message);
-            });
-        };
-        document.body.appendChild(script);
-    </script>
-
-    <script>
-        function isPortrait() {
-            return window.matchMedia("(orientation: portrait)").matches;
-        }
-
-        function enterFullscreen() {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) {
-                elem.msRequestFullscreen();
-            }
-        }
-
-        function exitFullscreen() {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            } else if (document.msExitFullscreen) {
-                document.msExitFullscreen();
-            }
+        function loadUnity() {
+            const script = document.createElement("script");
+            script.src = loaderUrl;
+            script.onload = () => {
+                createUnityInstance(canvas, config, (progress) => {
+                    progressBarFull.style.width = 100 * progress + "%";
+                }).then((unityInstance) => {
+                    loadingBar.style.display = "none";
+                    fullscreenButton.onclick = () => {
+                        unityInstance.SetFullscreen(1);
+                    };
+                }).catch((message) => {
+                    alert(message);
+                });
+            };
+            document.body.appendChild(script);
         }
 
         function updateLayout() {
-            const unityContainer = document.getElementById("unity-container");
-            const termsLink = document.getElementById("terms-link");
+            const isPortrait = window.matchMedia("(orientation: portrait)").matches;
 
-            if (isPortrait()) {
+            if (isPortrait) {
+                portraitWarning.style.display = "flex";
                 unityContainer.style.display = "none";
-                termsLink.style.display = "block";
-                exitFullscreen();
             } else {
+                portraitWarning.style.display = "none";
                 unityContainer.style.display = "flex";
-                termsLink.style.display = "none";
-                enterFullscreen();
+
+                if (!window.unityLoaded) {
+                    loadUnity();
+                    window.unityLoaded = true;
+                }
             }
         }
 
-        window.addEventListener("orientationchange", updateLayout);
         window.addEventListener("resize", updateLayout);
+        window.addEventListener("orientationchange", updateLayout);
         window.addEventListener("load", updateLayout);
     </script>
-
 </body>
 </html>
