@@ -159,6 +159,54 @@
         window.addEventListener("resize", updateLayout);
         window.addEventListener("orientationchange", updateLayout);
         window.addEventListener("load", updateLayout);
+
+        function isPortrait() {
+            return window.matchMedia("(orientation: portrait)").matches;
+        }
+
+        function enterFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        }
+
+        function exitFullscreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+
+        function updateLayout() {
+            const unityContainer = document.getElementById("unity-container");
+            const termsLink = document.getElementById("terms-link");
+
+            if (isPortrait()) {
+                // Show orientation message
+                unityContainer.style.display = "none";
+                termsLink.style.display = "block";
+                exitFullscreen();
+            } else {
+                // Landscape: show game and fullscreen
+                unityContainer.style.display = "flex";
+                termsLink.style.display = "none";
+                enterFullscreen();
+            }
+        }
+
+        window.addEventListener("orientationchange", updateLayout);
+        window.addEventListener("resize", updateLayout);
+
+        // Initial check
+        updateLayout();
     </script>
 </body>
 </html>
