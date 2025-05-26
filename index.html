@@ -135,36 +135,29 @@
     </script>
 
     <script>
-        function unityShowBanner(msg, type) {
-            const banner = document.querySelector("#unity-warning");
-            const div = document.createElement("div");
-            div.innerHTML = msg;
-            if (type === "error") div.style = "background: red; padding: 10px;";
-            else div.style = "background: yellow; padding: 10px;";
-            banner.appendChild(div);
-            if (type !== "error") {
-                setTimeout(() => {
-                    banner.removeChild(div);
-                }, 5000);
-            }
-            banner.style.display = "block";
-        }
-
         function isPortrait() {
             return window.matchMedia("(orientation: portrait)").matches;
         }
 
         function enterFullscreen() {
-            const el = document.documentElement;
-            if (el.requestFullscreen) el.requestFullscreen();
-            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-            else if (el.msRequestFullscreen) el.msRequestFullscreen();
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
         }
 
         function exitFullscreen() {
-            if (document.exitFullscreen) document.exitFullscreen();
-            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-            else if (document.msExitFullscreen) document.msExitFullscreen();
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
         }
 
         function updateLayout() {
@@ -184,46 +177,8 @@
 
         window.addEventListener("orientationchange", updateLayout);
         window.addEventListener("resize", updateLayout);
-
-        window.addEventListener("load", () => {
-            updateLayout(); // Set layout before starting game
-
-            const canvas = document.querySelector("#unity-canvas");
-            const loadingBar = document.querySelector("#unity-loading-bar");
-            const progressBarFull = document.querySelector("#unity-progress-bar-full");
-            const fullscreenButton = document.querySelector("#unity-fullscreen-button");
-
-            loadingBar.style.display = "block";
-
-            const buildUrl = "Build";
-            const loaderUrl = buildUrl + "/webGL Build.loader.js";
-            const config = {
-                dataUrl: buildUrl + "/webGL Build.data.br",
-                frameworkUrl: buildUrl + "/webGL Build.framework.js.br",
-                codeUrl: buildUrl + "/webGL Build.wasm.br",
-                streamingAssetsUrl: "StreamingAssets",
-                companyName: "DefaultCompany",
-                productName: "Tower of Defence",
-                productVersion: "1.0",
-                showBanner: unityShowBanner,
-            };
-
-            const script = document.createElement("script");
-            script.src = loaderUrl;
-            script.onload = () => {
-                createUnityInstance(canvas, config, (progress) => {
-                    progressBarFull.style.width = `${progress * 100}%`;
-                }).then((unityInstance) => {
-                    loadingBar.style.display = "none";
-                    fullscreenButton.onclick = () => unityInstance.SetFullscreen(1);
-                }).catch((err) => {
-                    alert("Unity failed to load: " + err);
-                });
-            };
-            document.body.appendChild(script);
-        });
+        window.addEventListener("load", updateLayout);
     </script>
-
 
 </body>
 </html>
