@@ -19,10 +19,16 @@
         #unity-container {
             display: none;
             width: 100vw;
-            height: 100vh;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
+            padding: 20px 0;
         }
+
+            #unity-container canvas {
+                width: 960px;
+                height: 600px;
+            }
 
         #portrait-warning {
             display: none;
@@ -119,9 +125,6 @@
                     fullscreenButton.onclick = () => {
                         unityInstance.SetFullscreen(1);
                     };
-
-                    // Auto fullscreen
-                    unityInstance.SetFullscreen(1);
                 }).catch((message) => {
                     alert(message);
                 });
