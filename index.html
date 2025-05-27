@@ -54,6 +54,21 @@
             color: #0066cc;
             text-decoration: none;
         }
+
+        #manual-fullscreen-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+            #manual-fullscreen-button:hover {
+                background-color: #004c99;
+            }
     </style>
 </head>
 <body>
@@ -78,6 +93,8 @@
         <a id="terms-link" href="terms.html">Läs villkor och bestämmelser</a>
     </div>
 
+    <button id="manual-fullscreen-button" style="display: none;">Starta i fullskärm</button>
+
     <script>
         const unityContainer = document.getElementById("unity-container");
         const canvas = document.getElementById("unity-canvas");
@@ -86,6 +103,7 @@
         const fullscreenButton = document.getElementById("unity-fullscreen-button");
         const warningBanner = document.getElementById("unity-warning");
         const portraitWarning = document.getElementById("portrait-warning");
+        const manualFullscreenButton = document.getElementById("manual-fullscreen-button");
 
         const buildUrl = "Build";
         const loaderUrl = buildUrl + "/webGL Build.loader.js";
@@ -99,6 +117,8 @@
             productVersion: "1.0",
             showBanner: unityShowBanner,
         };
+
+        let unityInstance = null;
 
         function unityShowBanner(msg, type) {
             function updateBannerVisibility() {
@@ -124,16 +144,12 @@
             script.onload = () => {
                 createUnityInstance(canvas, config, (progress) => {
                     progressBarFull.style.width = 100 * progress + "%";
-                }).then((unityInstance) => {
+                }).then((instance) => {
+                    unityInstance = instance;
                     loadingBar.style.display = "none";
-                    fullscreenButton.onclick = () => unityInstance.SetFullscreen(1);
+                    fullscreenButton.onclick = () => instance.SetFullscreen(1);
 
-                    // Automatically request fullscreen on mobile
-                    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                        setTimeout(() => {
-                            document.documentElement.requestFullscreen?.();
-                        }, 500);
-                    }
+                    tryAutoFullscreen();
                 }).catch((message) => {
                     alert(message);
                 });
@@ -141,12 +157,33 @@
             document.body.appendChild(script);
         }
 
+        function tryAutoFullscreen() {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+                // iOS requires user interaction — show manual button
+                if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                    manualFullscreenButton.style.display = "block";
+                } else {
+                    // Android can go fullscreen automatically
+                    setTimeout(() => {
+                        document.documentElement.requestFullscreen?.().catch(() => { });
+                    }, 500);
+                }
+            }
+        }
+
+        manualFullscreenButton.addEventListener("click", () => {
+            document.documentElement.requestFullscreen?.().catch(() => { });
+            manualFullscreenButton.style.display = "none";
+        });
+
         function updateLayout() {
             const isPortrait = window.matchMedia("(orientation: portrait)").matches;
 
             if (isPortrait) {
                 portraitWarning.style.display = "flex";
                 unityContainer.style.display = "none";
+                manualFullscreenButton.style.display = "none";
             } else {
                 portraitWarning.style.display = "none";
                 unityContainer.style.display = "flex";
@@ -154,6 +191,8 @@
                 if (!window.unityLoaded) {
                     loadUnity();
                     window.unityLoaded = true;
+                } else if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                    manualFullscreenButton.style.display = "block";
                 }
             }
         }
