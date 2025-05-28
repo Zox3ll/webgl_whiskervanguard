@@ -1,51 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8">
     <title>Unity WebGL Player | Tower of Defence</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <link rel="shortcut icon" href="TemplateData/favicon.ico" />
-    <link rel="stylesheet" href="TemplateData/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
     <style>
         html, body {
             margin: 0;
             padding: 0;
-            background-color: #000;
             font-family: Arial, sans-serif;
-            overflow: hidden;
+            background-color: #000;
+            overflow-x: hidden;
         }
 
         #unity-container {
             display: none;
             width: 100vw;
-            height: 100vh;
             justify-content: center;
             align-items: center;
             flex-direction: column;
+            padding: 20px 0;
         }
 
             #unity-container canvas {
-                width: 960px;
-                height: 600px;
+                width: 100%;
+                height: auto;
+                max-width: 960px;
+                aspect-ratio: 16 / 10;
             }
 
         #portrait-warning {
             display: none;
-            position: fixed;
-            z-index: 9999;
-            top: 0;
-            left: 0;
-            width: 100vw;
             height: 100vh;
             padding: 20px;
-            background-color: white;
-            color: black;
+            text-align: center;
+            background-color: #fff;
+            color: #000;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            text-align: center;
         }
 
         #terms-link {
@@ -55,23 +52,29 @@
             text-decoration: none;
         }
 
-        #manual-fullscreen-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 18px;
-            background-color: #0066cc;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
+        #unity-footer {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
         }
 
-            #manual-fullscreen-button:hover {
-                background-color: #004c99;
-            }
+        #unity-fullscreen-button {
+            cursor: pointer;
+            width: 38px;
+            height: 38px;
+            background-image: url('TemplateData/fullscreen-button.png'); /* Replace if needed */
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
     </style>
 </head>
 <body>
+
     <div id="unity-container" class="unity-desktop">
         <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
         <div id="unity-loading-bar">
@@ -93,8 +96,6 @@
         <a id="terms-link" href="terms.html">Läs villkor och bestämmelser</a>
     </div>
 
-    <button id="manual-fullscreen-button" style="display: none;">Starta i fullskärm</button>
-
     <script>
         const unityContainer = document.getElementById("unity-container");
         const canvas = document.getElementById("unity-canvas");
@@ -103,7 +104,24 @@
         const fullscreenButton = document.getElementById("unity-fullscreen-button");
         const warningBanner = document.getElementById("unity-warning");
         const portraitWarning = document.getElementById("portrait-warning");
-        const manualFullscreenButton = document.getElementById("manual-fullscreen-button");
+
+        function unityShowBanner(msg, type) {
+            function updateBannerVisibility() {
+                warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+            }
+            var div = document.createElement('div');
+            div.innerHTML = msg;
+            warningBanner.appendChild(div);
+            if (type === 'error') div.style = 'background: red; padding: 10px;';
+            else {
+                if (type === 'warning') div.style = 'background: yellow; padding: 10px;';
+                setTimeout(() => {
+                    warningBanner.removeChild(div);
+                    updateBannerVisibility();
+                }, 5000);
+            }
+            updateBannerVisibility();
+        }
 
         const buildUrl = "Build";
         const loaderUrl = buildUrl + "/webGL Build.loader.js";
@@ -118,38 +136,17 @@
             showBanner: unityShowBanner,
         };
 
-        let unityInstance = null;
-
-        function unityShowBanner(msg, type) {
-            function updateBannerVisibility() {
-                warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-            }
-            const div = document.createElement('div');
-            div.innerHTML = msg;
-            warningBanner.appendChild(div);
-            if (type === 'error') div.style = 'background: red; padding: 10px;';
-            else {
-                if (type === 'warning') div.style = 'background: yellow; padding: 10px;';
-                setTimeout(() => {
-                    warningBanner.removeChild(div);
-                    updateBannerVisibility();
-                }, 5000);
-            }
-            updateBannerVisibility();
-        }
-
         function loadUnity() {
             const script = document.createElement("script");
             script.src = loaderUrl;
             script.onload = () => {
                 createUnityInstance(canvas, config, (progress) => {
                     progressBarFull.style.width = 100 * progress + "%";
-                }).then((instance) => {
-                    unityInstance = instance;
+                }).then((unityInstance) => {
                     loadingBar.style.display = "none";
-                    fullscreenButton.onclick = () => instance.SetFullscreen(1);
-
-                    tryAutoFullscreen();
+                    fullscreenButton.onclick = () => {
+                        unityInstance.SetFullscreen(1);
+                    };
                 }).catch((message) => {
                     alert(message);
                 });
@@ -157,33 +154,12 @@
             document.body.appendChild(script);
         }
 
-        function tryAutoFullscreen() {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            if (isMobile) {
-                // iOS requires user interaction — show manual button
-                if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-                    manualFullscreenButton.style.display = "block";
-                } else {
-                    // Android can go fullscreen automatically
-                    setTimeout(() => {
-                        document.documentElement.requestFullscreen?.().catch(() => { });
-                    }, 500);
-                }
-            }
-        }
-
-        manualFullscreenButton.addEventListener("click", () => {
-            document.documentElement.requestFullscreen?.().catch(() => { });
-            manualFullscreenButton.style.display = "none";
-        });
-
         function updateLayout() {
             const isPortrait = window.matchMedia("(orientation: portrait)").matches;
 
             if (isPortrait) {
                 portraitWarning.style.display = "flex";
                 unityContainer.style.display = "none";
-                manualFullscreenButton.style.display = "none";
             } else {
                 portraitWarning.style.display = "none";
                 unityContainer.style.display = "flex";
@@ -191,8 +167,6 @@
                 if (!window.unityLoaded) {
                     loadUnity();
                     window.unityLoaded = true;
-                } else if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-                    manualFullscreenButton.style.display = "block";
                 }
             }
         }
