@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Unity WebGL Player | Tower of Defence</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
@@ -13,36 +13,73 @@
             padding: 0;
             font-family: Arial, sans-serif;
             background-color: #000;
-            overflow-x: hidden;
+            overflow: hidden;
+            height: 100%;
         }
 
         #unity-container {
-            display: none;
+            display: flex;
             width: 100vw;
+            height: 100vh;
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            padding: 20px 0;
+            box-sizing: border-box;
+            position: relative;
         }
 
             #unity-container canvas {
-                width: 100%;
-                height: auto;
-                max-width: 960px;
-                aspect-ratio: 16 / 10;
+                width: 100vw;
+                height: 100vh;
+                max-width: 100%;
+                max-height: 100%;
+                display: block;
             }
+
+        #unity-footer {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            z-index: 10;
+            pointer-events: auto;
+        }
+
+        #unity-fullscreen-button {
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            background-image: url('TemplateData/fullscreen-button.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        #unity-build-title {
+            color: white;
+            font-size: 16px;
+        }
 
         #portrait-warning {
             display: none;
+            position: absolute;
+            z-index: 20;
+            top: 0;
+            left: 0;
+            width: 100vw;
             height: 100vh;
             padding: 20px;
             text-align: center;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.95);
             color: #000;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            pointer-events: none;
         }
 
         #terms-link {
@@ -52,31 +89,29 @@
             text-decoration: none;
         }
 
-        #unity-footer {
+        #unity-warning {
+            position: absolute;
+            top: 10px;
             width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-            flex-wrap: wrap;
+            color: #fff;
+            text-align: center;
+            z-index: 15;
         }
 
-        #unity-fullscreen-button {
-            cursor: pointer;
-            width: 38px;
-            height: 38px;
-            background-image: url('TemplateData/fullscreen-button.png'); /* Replace if needed */
-            background-size: contain;
-            background-repeat: no-repeat;
+        #unity-loading-bar {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            text-align: center;
+            z-index: 5;
         }
-
     </style>
 </head>
 <body>
 
     <div id="unity-container" class="unity-desktop">
-        <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
+        <canvas id="unity-canvas" tabindex="-1"></canvas>
         <div id="unity-loading-bar">
             <div id="unity-logo"></div>
             <div id="unity-progress-bar-empty">
@@ -159,15 +194,18 @@
 
             if (isPortrait) {
                 portraitWarning.style.display = "flex";
-                unityContainer.style.display = "none";
+                unityContainer.style.pointerEvents = "none";
+                unityContainer.style.opacity = "0.3";
             } else {
                 portraitWarning.style.display = "none";
-                unityContainer.style.display = "flex";
+                unityContainer.style.pointerEvents = "auto";
+                unityContainer.style.opacity = "1";
+            }
 
-                if (!window.unityLoaded) {
-                    loadUnity();
-                    window.unityLoaded = true;
-                }
+            // Always load Unity once
+            if (!window.unityLoaded) {
+                loadUnity();
+                window.unityLoaded = true;
             }
         }
 
