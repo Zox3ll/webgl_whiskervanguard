@@ -46,7 +46,6 @@
             align-items: center;
             gap: 10px;
             z-index: 10;
-            pointer-events: auto;
         }
 
         #unity-fullscreen-button {
@@ -64,29 +63,31 @@
         }
 
         #portrait-warning {
-            display: none;
             position: absolute;
             z-index: 20;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            padding: 20px;
-            text-align: center;
             background-color: rgba(255, 255, 255, 0.95);
-            color: #000;
-            display: flex;
-            flex-direction: column;
+            display: none;
             justify-content: center;
             align-items: center;
-            pointer-events: none;
+        }
+
+        #portrait-message {
+            text-align: center;
+            color: #000;
+            padding: 20px;
+            pointer-events: auto;
         }
 
         #terms-link {
+            display: inline-block;
             margin-top: 20px;
             font-size: 16px;
             color: #0066cc;
-            text-decoration: none;
+            text-decoration: underline;
         }
 
         #unity-warning {
@@ -127,8 +128,10 @@
     </div>
 
     <div id="portrait-warning">
-        <p>Vänligen rotera din enhet till liggande läge (landskap) för att spela.</p>
-        <a id="terms-link" href="terms.html">Läs villkor och bestämmelser</a>
+        <div id="portrait-message">
+            <p>Vänligen rotera din enhet till liggande läge (landskap) för att spela.</p>
+            <a id="terms-link" href="terms.html">Läs villkor och bestämmelser</a>
+        </div>
     </div>
 
     <script>
