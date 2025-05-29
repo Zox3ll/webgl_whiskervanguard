@@ -1,75 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
     <meta charset="utf-8">
     <title>Unity WebGL Player | Tower of Defence</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link rel="shortcut icon" href="TemplateData/favicon.ico" />
+    <link rel="stylesheet" href="TemplateData/style.css" />
     <style>
         html, body {
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
             background-color: #000;
-            overflow: hidden;
-            height: 100%;
+            overflow-x: hidden;
         }
 
         #unity-container {
-            display: flex;
+            display: none;
             width: 100vw;
             height: 100vh;
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            box-sizing: border-box;
-            position: relative;
+            background-color: #000;
         }
 
             #unity-container canvas {
-                width: 100vw;
-                height: 100vh;
-                max-width: 100%;
-                max-height: 100%;
-                display: block;
+                width: 960px;
+                height: 600px;
             }
 
         #unity-footer {
             position: absolute;
-            bottom: 50px; /* moved it up from 10px */
+            bottom: 50px;
             left: 0;
-            right: 0;
+            width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             z-index: 10;
+        }
+
+        #unity-webgl-logo {
+            display: none;
         }
 
         #unity-fullscreen-button {
             width: 38px;
             height: 38px;
-            cursor: pointer;
+            background-color: #333;
+            border-radius: 8px;
             background-image: url('TemplateData/fullscreen-button.png');
-            background-size: contain;
-            background-repeat: no-repeat;
+            background-size: cover;
+            cursor: pointer;
         }
 
-        #unity-expand-label {
-            color: white;
-            font-size: 16px;
-            font-family: Arial, sans-serif;
+        #unity-build-title {
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
         }
 
         #portrait-warning {
             display: none;
             height: 100vh;
+            width: 100vw;
             padding: 20px;
             text-align: center;
-            background-color: #2b2b2b; /* dark gray background */
-            color: #ffffff; /* white text */
+            background-color: #2b2b2b;
+            color: #ffffff;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -83,53 +83,18 @@
 
             #portrait-warning a {
                 font-size: 16px;
-                color: #66aaff; /* softer blue for better readability on dark bg */
+                color: #66aaff;
                 text-decoration: none;
             }
 
                 #portrait-warning a:hover {
                     text-decoration: underline;
                 }
-
-
-        #portrait-message {
-            text-align: center;
-            color: #000;
-            padding: 20px;
-            pointer-events: auto;
-        }
-
-        #terms-link {
-            display: inline-block;
-            margin-top: 20px;
-            font-size: 16px;
-            color: #0066cc;
-            text-decoration: underline;
-        }
-
-        #unity-warning {
-            position: absolute;
-            top: 10px;
-            width: 100%;
-            color: #fff;
-            text-align: center;
-            z-index: 15;
-        }
-
-        #unity-loading-bar {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 100%;
-            text-align: center;
-            z-index: 5;
-        }
     </style>
 </head>
 <body>
-
     <div id="unity-container" class="unity-desktop">
-        <canvas id="unity-canvas" tabindex="-1"></canvas>
+        <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
         <div id="unity-loading-bar">
             <div id="unity-logo"></div>
             <div id="unity-progress-bar-empty">
@@ -138,10 +103,8 @@
         </div>
         <div id="unity-warning"></div>
         <div id="unity-footer">
-            <div id="unity-webgl-logo"></div>
             <div id="unity-fullscreen-button"></div>
-            <div id="unity-expand-label">Full screen</div>
-
+            <div id="unity-build-title">Expand</div>
         </div>
     </div>
 
@@ -215,18 +178,15 @@
 
             if (isPortrait) {
                 portraitWarning.style.display = "flex";
-                unityContainer.style.pointerEvents = "none";
-                unityContainer.style.opacity = "0.3";
+                unityContainer.style.display = "none";
             } else {
                 portraitWarning.style.display = "none";
-                unityContainer.style.pointerEvents = "auto";
-                unityContainer.style.opacity = "1";
-            }
+                unityContainer.style.display = "flex";
 
-            // Always load Unity once
-            if (!window.unityLoaded) {
-                loadUnity();
-                window.unityLoaded = true;
+                if (!window.unityLoaded) {
+                    loadUnity();
+                    window.unityLoaded = true;
+                }
             }
         }
 
